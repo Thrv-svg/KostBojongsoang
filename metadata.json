@@ -1,0 +1,6 @@
+{
+  "name": "ThrivIT — Enterprise Digital Ecosystem & IT Solutions",
+  "description": "ThrivIT engineers unified IT ecosystems and scalable digital architecture that empower growing enterprises to eliminate data silos, automate complex workflows, and thrive.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

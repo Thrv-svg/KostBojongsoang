@@ -1,6 +1,7 @@
 import React from 'react';
 import { KostProperty } from '../data/kostData';
 import { ArrowRightLeft, X, Trash2, Plus } from 'lucide-react';
+import { handleImageFallback } from '../utils/imageUtils';
 
 interface CompareFloatingBarProps {
   selectedKosts: KostProperty[];
@@ -8,6 +9,7 @@ interface CompareFloatingBarProps {
   onRemoveKost: (id: string) => void;
   onClearAll: () => void;
   onOpenCompare: () => void;
+  onSelectDetail?: (kost: KostProperty) => void;
 }
 
 export const CompareFloatingBar: React.FC<CompareFloatingBarProps> = ({
@@ -16,6 +18,7 @@ export const CompareFloatingBar: React.FC<CompareFloatingBarProps> = ({
   onRemoveKost,
   onClearAll,
   onOpenCompare,
+  onSelectDetail,
 }) => {
   if (selectedKosts.length === 0) return null;
 
@@ -65,16 +68,19 @@ export const CompareFloatingBar: React.FC<CompareFloatingBarProps> = ({
             {selectedKosts.map((kost) => (
               <div
                 key={kost.id}
-                className="relative flex items-center gap-2 bg-sky-950/70 border border-sky-700/50 rounded-xl p-1.5 pr-2.5 shrink-0 max-w-[200px]"
+                onClick={() => onSelectDetail && onSelectDetail(kost)}
+                className="relative flex items-center gap-2 bg-sky-950/70 hover:bg-sky-900 border border-sky-700/50 rounded-xl p-1.5 pr-2.5 shrink-0 max-w-[200px] cursor-pointer group/item transition-colors"
+                title="Klik untuk melihat detail lengkap kamar ini"
               >
                 <img
                   src={kost.mainImage}
                   alt={kost.name}
-                  className="w-10 h-10 rounded-lg object-cover shrink-0"
+                  onError={handleImageFallback}
+                  className="w-10 h-10 rounded-lg object-cover shrink-0 group-hover/item:scale-105 transition-transform"
                   referrerPolicy="no-referrer"
                 />
                 <div className="min-w-0 pr-2">
-                  <p className="text-xs font-semibold text-white truncate">
+                  <p className="text-xs font-semibold text-white truncate group-hover/item:text-sky-300 transition-colors">
                     {kost.name}
                   </p>
                   <p className="text-[10px] font-mono text-sky-300 truncate">

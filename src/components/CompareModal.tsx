@@ -20,6 +20,7 @@ import {
   Shield,
   Zap
 } from 'lucide-react';
+import { handleImageFallback } from '../utils/imageUtils';
 
 interface CompareModalProps {
   isOpen: boolean;
@@ -130,12 +131,20 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                         <X className="w-3.5 h-3.5" />
                       </button>
 
-                      {/* Photo Thumbnail */}
-                      <div className="relative h-28 sm:h-32 w-full rounded-xl overflow-hidden bg-slate-200">
+                      {/* Photo Thumbnail - Clickable */}
+                      <div
+                        onClick={() => {
+                          onClose();
+                          onSelectDetail(kost);
+                        }}
+                        className="relative h-28 sm:h-32 w-full rounded-xl overflow-hidden bg-slate-200 cursor-pointer group/thumb"
+                        title="Klik untuk membuka detail lengkap kamar"
+                      >
                         <img
                           src={kost.mainImage}
                           alt={kost.name}
-                          className="w-full h-full object-cover"
+                          onError={handleImageFallback}
+                          className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-300"
                           referrerPolicy="no-referrer"
                         />
                         <div className="absolute top-2 left-2">
@@ -145,9 +154,16 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                         </div>
                       </div>
 
-                      {/* Kost Identity */}
-                      <div>
-                        <h4 className="text-sm font-bold text-[#0C4A6E] line-clamp-1">
+                      {/* Kost Identity - Clickable */}
+                      <div
+                        onClick={() => {
+                          onClose();
+                          onSelectDetail(kost);
+                        }}
+                        className="cursor-pointer group/title"
+                        title="Klik untuk membuka detail kamar"
+                      >
+                        <h4 className="text-sm font-bold text-[#0C4A6E] line-clamp-1 group-hover/title:text-[#0EA5E9] transition-colors">
                           {kost.name}
                         </h4>
                         <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
@@ -156,10 +172,17 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                         </p>
                       </div>
 
-                      {/* Price */}
-                      <div className="pt-1">
+                      {/* Price - Clickable */}
+                      <div
+                        onClick={() => {
+                          onClose();
+                          onSelectDetail(kost);
+                        }}
+                        className="pt-1 cursor-pointer"
+                        title="Klik untuk membuka detail kamar"
+                      >
                         <span className="text-[10px] text-slate-400 font-medium block">Harga Bulanan</span>
-                        <div className="text-sm sm:text-base font-mono font-bold text-[#0C4A6E]">
+                        <div className="text-sm sm:text-base font-mono font-bold text-[#0C4A6E] hover:text-[#0EA5E9] transition-colors">
                           {formatPrice(kost.monthlyPrice)}
                           <span className="text-[10px] font-normal text-slate-500"> /bln</span>
                         </div>

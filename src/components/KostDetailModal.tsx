@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import { KostProperty } from '../data/kostData';
-import { X, Check, MapPin, Shield, Wifi, Wind, Bath, Maximize2, MessageCircle, AlertCircle, Calendar, Sparkles, AlertTriangle, Utensils, Flame } from 'lucide-react';
+import { X, Check, MapPin, Shield, Wifi, Wind, Bath, Maximize2, MessageCircle, AlertCircle, Calendar, Sparkles, AlertTriangle, Utensils, Flame, Heart } from 'lucide-react';
+import { handleImageFallback } from '../utils/imageUtils';
 
 interface KostDetailModalProps {
   kost: KostProperty | null;
   onClose: () => void;
   onProceedBooking: (kost: KostProperty) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: string) => void;
 }
 
 export const KostDetailModal: React.FC<KostDetailModalProps> = ({
   kost,
   onClose,
   onProceedBooking,
+  isFavorite = false,
+  onToggleFavorite,
 }) => {
   if (!kost) return null;
 
@@ -40,14 +45,32 @@ export const KostDetailModal: React.FC<KostDetailModalProps> = ({
             <span className="text-xs text-slate-500 font-medium">ID: {kost.id}</span>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
-            aria-label="Tutup modal rincian"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onToggleFavorite && (
+              <button
+                type="button"
+                onClick={() => onToggleFavorite(kost.id)}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                  isFavorite
+                    ? 'bg-rose-50 text-rose-700 border-rose-300'
+                    : 'bg-white text-slate-700 border-slate-200 hover:border-rose-300 hover:text-rose-600'
+                }`}
+                title={isFavorite ? 'Hapus dari daftar favorit' : 'Simpan kamar ke favorit (localStorage)'}
+              >
+                <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-slate-400'}`} />
+                <span className="hidden sm:inline">{isFavorite ? 'Tersimpan' : 'Simpan Favorit'}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              aria-label="Tutup modal rincian"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Modal Content */}
@@ -58,6 +81,7 @@ export const KostDetailModal: React.FC<KostDetailModalProps> = ({
               <img
                 src={kost.galleryImages[activeImageIndex] || kost.mainImage}
                 alt={`${kost.name} foto ${activeImageIndex + 1}`}
+                onError={handleImageFallback}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
               />
@@ -79,7 +103,13 @@ export const KostDetailModal: React.FC<KostDetailModalProps> = ({
                       : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt="thumbnail" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <img 
+                    src={img} 
+                    alt="thumbnail" 
+                    onError={handleImageFallback} 
+                    className="w-full h-full object-cover" 
+                    referrerPolicy="no-referrer" 
+                  />
                 </button>
               ))}
             </div>

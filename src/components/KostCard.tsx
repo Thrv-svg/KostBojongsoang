@@ -1,6 +1,7 @@
 import React from 'react';
 import { KostProperty } from '../data/kostData';
-import { Wifi, Wind, Bath, Shield, MapPin, Maximize2, MessageCircle, Info, AlertCircle, Utensils, Flame, ArrowRightLeft, Check } from 'lucide-react';
+import { Wifi, Wind, Bath, Shield, MapPin, Maximize2, MessageCircle, Info, AlertCircle, Utensils, Flame, ArrowRightLeft, Check, Heart } from 'lucide-react';
+import { handleImageFallback } from '../utils/imageUtils';
 
 interface KostCardProps {
   kost: KostProperty;
@@ -8,6 +9,8 @@ interface KostCardProps {
   onOpenBooking: (kost: KostProperty) => void;
   isCompared?: boolean;
   onToggleCompare?: (kost: KostProperty) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: string) => void;
 }
 
 export const KostCard: React.FC<KostCardProps> = ({
@@ -16,6 +19,8 @@ export const KostCard: React.FC<KostCardProps> = ({
   onOpenBooking,
   isCompared = false,
   onToggleCompare,
+  isFavorite = false,
+  onToggleFavorite,
 }) => {
   const categoryLabels = {
     putra: 'Kost Putra',
@@ -30,7 +35,7 @@ export const KostCard: React.FC<KostCardProps> = ({
   }).format(kost.monthlyPrice);
 
   return (
-    <div className="group bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden">
+    <div className="group bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:shadow-slate-300/50 hover:-translate-y-1.5 hover:border-sky-200 transition-all duration-300 ease-out flex flex-col overflow-hidden will-change-transform">
       {/* Photo Container - Clickable to open detail */}
       <div
         onClick={() => onSelectDetail(kost)}
@@ -40,6 +45,7 @@ export const KostCard: React.FC<KostCardProps> = ({
         <img
           src={kost.mainImage}
           alt={kost.name}
+          onError={handleImageFallback}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           referrerPolicy="no-referrer"
           loading="lazy"
@@ -64,16 +70,35 @@ export const KostCard: React.FC<KostCardProps> = ({
           )}
         </div>
 
-        {/* Compare Toggle Button on Top Right */}
-        {onToggleCompare && (
-          <div className="absolute top-3 right-3 z-10">
+        {/* Action Controls on Top Right: Wishlist Heart & Compare */}
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+          {onToggleFavorite && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(kost.id);
+              }}
+              className={`p-2 rounded-lg text-xs font-semibold flex items-center justify-center transition-all duration-200 shadow-sm cursor-pointer ${
+                isFavorite
+                  ? 'bg-rose-500 text-white ring-2 ring-white/90 scale-105 shadow-rose-500/30'
+                  : 'bg-black/50 hover:bg-black/75 text-white/90 backdrop-blur-xs border border-white/30 hover:scale-105'
+              }`}
+              title={isFavorite ? 'Hapus dari Kamar Favorit' : 'Simpan ke Kamar Favorit (Wishlist)'}
+              aria-label={isFavorite ? 'Hapus dari Kamar Favorit' : 'Simpan ke Kamar Favorit'}
+            >
+              <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-white text-white' : 'text-white'}`} />
+            </button>
+          )}
+
+          {onToggleCompare && (
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleCompare(kost);
               }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer ${
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer ${
                 isCompared
                   ? 'bg-[#0EA5E9] text-white ring-2 ring-white/90 scale-105'
                   : 'bg-black/50 hover:bg-black/75 text-white/90 backdrop-blur-xs border border-white/30'
@@ -83,17 +108,17 @@ export const KostCard: React.FC<KostCardProps> = ({
               {isCompared ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-white" />
-                  <span>Dibandingkan</span>
+                  <span className="hidden sm:inline">Dibandingkan</span>
                 </>
               ) : (
                 <>
                   <ArrowRightLeft className="w-3.5 h-3.5" />
-                  <span>Bandingkan</span>
+                  <span className="hidden sm:inline">Bandingkan</span>
                 </>
               )}
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Distance Overlaid on Photo */}
         <div className="absolute bottom-3 left-3 right-3 text-white">
@@ -107,25 +132,6 @@ export const KostCard: React.FC<KostCardProps> = ({
       {/* Content Body */}
       <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
         <div className="space-y-2">
-          {/* Unboxed Metadata / Legend Info - Clickable to open detail */}
-          <div
-            onClick={() => onSelectDetail(kost)}
-            className="flex items-center gap-2 text-xs text-slate-500 flex-wrap cursor-pointer hover:text-[#0EA5E9] transition-colors group/meta"
-            title="Klik informasi kamar untuk melihat rincian detail"
-          >
-            <span className="group-hover/meta:underline">{kost.area}</span>
-            <span aria-hidden="true">·</span>
-            <span className="group-hover/meta:underline">{kost.roomSize}</span>
-            <span aria-hidden="true">·</span>
-            <span className={`${kost.hasWaterHeater ? 'text-emerald-700 font-medium' : 'text-slate-500'} group-hover/meta:underline`}>
-              Water Heater: {kost.hasWaterHeater ? 'Ada' : 'Tidak Ada'}
-            </span>
-            <span aria-hidden="true">·</span>
-            <span className="group-hover/meta:underline">
-              {kost.electricityPolicy.includes('mandiri') ? 'Token Sendiri' : 'Listrik Termasuk'}
-            </span>
-          </div>
-
           {/* Title - Clickable to open detail */}
           <h3
             onClick={() => onSelectDetail(kost)}
@@ -143,43 +149,76 @@ export const KostCard: React.FC<KostCardProps> = ({
             {kost.tagline}
           </p>
 
-          {/* Key Amenities Legend Preview - Clickable to open detail */}
+          {/* Room Specification & Facility Legend Box - Clickable to open detail */}
           <div
             onClick={() => onSelectDetail(kost)}
-            className="pt-2 flex items-center gap-3 text-xs text-slate-600 flex-wrap cursor-pointer hover:text-[#0C4A6E] transition-colors"
-            title="Klik fasilitas untuk melihat spesifikasi kamar"
+            className="p-3 bg-slate-50 hover:bg-sky-50/70 border border-slate-200/90 hover:border-sky-300 rounded-xl transition-all cursor-pointer group/legend space-y-2 shadow-2xs"
+            title="Klik legend fasilitas & spesifikasi ini untuk melihat rincian detail kamar"
           >
-            {kost.hasWiFi && (
-              <div className="flex items-center gap-1">
-                <Wifi className="w-3.5 h-3.5 text-[#0EA5E9]" />
-                <span>Wi-Fi Cepat</span>
-              </div>
-            )}
-            {kost.hasPrivateBathroom && (
-              <div className="flex items-center gap-1">
-                <Bath className="w-3.5 h-3.5 text-[#0EA5E9]" />
-                <span>KM Dalam</span>
-              </div>
-            )}
-            {kost.hasAC ? (
-              <div className="flex items-center gap-1">
-                <Wind className="w-3.5 h-3.5 text-[#0EA5E9]" />
-                <span>AC</span>
-              </div>
-            ) : null}
-            <div className="flex items-center gap-1">
-              <Utensils className="w-3.5 h-3.5 text-[#0EA5E9]" />
-              <span className="font-medium">
-                {kost.gasPolicy.includes('termasuk')
-                  ? 'Dapur (Gas Termasuk)'
-                  : kost.gasPolicy.includes('beli sendiri')
-                  ? 'Dapur (Gas Beli Sendiri)'
-                  : 'Pantry Listrik'}
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[#0C4A6E] pb-1 border-b border-slate-200/60">
+              <span className="flex items-center gap-1.5 text-[#0EA5E9]">
+                <Info className="w-3.5 h-3.5 shrink-0" />
+                <span className="font-bold">Legend Informasi & Fasilitas</span>
+              </span>
+              <span className="text-[10px] text-slate-400 group-hover/legend:text-[#0EA5E9] font-normal underline">
+                Buka Detail →
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5 text-[#0EA5E9]" />
-              <span>CCTV 24 Jam</span>
+
+            {/* Quick Specs Legend Items */}
+            <div className="flex items-center gap-1.5 text-xs text-slate-600 flex-wrap">
+              <span className="font-medium text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200/70 shadow-2xs">
+                {kost.area}
+              </span>
+              <span className="font-mono bg-white px-2 py-0.5 rounded border border-slate-200/70 shadow-2xs">
+                {kost.roomSize}
+              </span>
+              <span className={`px-2 py-0.5 rounded border shadow-2xs ${
+                kost.hasWaterHeater
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-medium'
+                  : 'bg-white text-slate-600 border-slate-200/70'
+              }`}>
+                Water Heater: {kost.hasWaterHeater ? 'Ada' : 'Tidak Ada'}
+              </span>
+              <span className="bg-white px-2 py-0.5 rounded border border-slate-200/70 text-[11px] shadow-2xs">
+                {kost.electricityPolicy.includes('mandiri') ? 'Token Sendiri' : 'Listrik Termasuk'}
+              </span>
+            </div>
+
+            {/* Key Amenities Preview Badges */}
+            <div className="flex items-center gap-2.5 text-xs text-slate-600 flex-wrap pt-0.5">
+              {kost.hasWiFi && (
+                <div className="flex items-center gap-1 group-hover/legend:text-[#0C4A6E]">
+                  <Wifi className="w-3.5 h-3.5 text-[#0EA5E9]" />
+                  <span>Wi-Fi Cepat</span>
+                </div>
+              )}
+              {kost.hasPrivateBathroom && (
+                <div className="flex items-center gap-1 group-hover/legend:text-[#0C4A6E]">
+                  <Bath className="w-3.5 h-3.5 text-[#0EA5E9]" />
+                  <span>KM Dalam</span>
+                </div>
+              )}
+              {kost.hasAC && (
+                <div className="flex items-center gap-1 group-hover/legend:text-[#0C4A6E]">
+                  <Wind className="w-3.5 h-3.5 text-[#0EA5E9]" />
+                  <span>AC</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1 group-hover/legend:text-[#0C4A6E]">
+                <Utensils className="w-3.5 h-3.5 text-[#0EA5E9]" />
+                <span className="font-medium text-[11px]">
+                  {kost.gasPolicy.includes('termasuk')
+                    ? 'Dapur (Gas Termasuk)'
+                    : kost.gasPolicy.includes('beli sendiri')
+                    ? 'Dapur (Gas Beli Sendiri)'
+                    : 'Pantry Listrik'}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 group-hover/legend:text-[#0C4A6E]">
+                <Shield className="w-3.5 h-3.5 text-[#0EA5E9]" />
+                <span>CCTV 24 Jam</span>
+              </div>
             </div>
           </div>
 

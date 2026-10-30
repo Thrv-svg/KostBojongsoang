@@ -1,3 +1,8 @@
+import heroKostBojongsoang from '../assets/images/hero_kost_bojongsoang_1792854715076.jpg';
+import kostRoomModern from '../assets/images/kost_room_modern_1792854715841.jpg';
+import kostRoomDeluxe from '../assets/images/kost_room_deluxe_1792854716917.jpg';
+import kostSharedKitchen from '../assets/images/kost_shared_kitchen_1792854716762.jpg';
+
 export interface KostProperty {
   id: string;
   name: string;
@@ -36,12 +41,14 @@ export interface KostProperty {
 export interface CampusPOI {
   id: string;
   name: string;
-  category: 'gate' | 'academic' | 'facility' | 'food' | 'market';
+  category: 'gate' | 'academic' | 'facility' | 'food' | 'market' | 'laundry';
   distance: string;
   description: string;
   x: number;
   y: number;
   position: { lat: number; lng: number }; // Real GPS coordinates for Google Maps
+  openingHours?: string;
+  priceEstimate?: string;
 }
 
 export interface Testimonial {
@@ -79,11 +86,11 @@ export const KOST_LISTINGS: KostProperty[] = [
     includedUtilities: ['Wi-Fi Fiber 150 Mbps', 'Air Bersih PDAM & Filter', 'Iuran Kebersihan & Keamanan'],
     electricityPolicy: 'Token listrik mandiri per kamar (lebih hemat dan adil)',
     features: ['Kasur Springbed 120x200', 'Kamar Mandi Dalam', 'Meja Belajar & Kursi Ergonomis', 'Lemari Pakaian 2 Pintu', 'Dapur Bersama Lengkap', 'Kulkas & Dispenser Bersama', 'Parkir Motor Kanopi', 'CCTV 24 Jam & Pintu Akses'],
-    mainImage: '/src/assets/images/kost_room_modern_1792854715841.jpg',
+    mainImage: kostRoomModern,
     galleryImages: [
-      '/src/assets/images/kost_room_modern_1792854715841.jpg',
-      '/src/assets/images/hero_kost_bojongsoang_1792854715076.jpg',
-      '/src/assets/images/kost_shared_kitchen_1792854716762.jpg',
+      kostRoomModern,
+      heroKostBojongsoang,
+      kostSharedKitchen,
     ],
     whatsappNumber: '6281223456781',
     rules: [
@@ -129,11 +136,11 @@ export const KOST_LISTINGS: KostProperty[] = [
     includedUtilities: ['Wi-Fi Kecepatan Tinggi Dedicated', 'Air Bersih Non-Stop', 'Biaya Sampah', 'Air Minum Galon RO'],
     electricityPolicy: 'Termasuk listrik dasar (lampu, laptop, kipas; alat pemanas tambahan kena biaya opsional)',
     features: ['Kasur Springbed', 'Kamar Mandi Dalam', 'Kloset Duduk & Shower', 'Meja Komputer Luas', 'Lemari Minimalis', 'Dapur Bersama', 'Parkir Motor Luas Berpagar', 'Penjaga Kost Siaga 24 Jam'],
-    mainImage: '/src/assets/images/hero_kost_bojongsoang_1792854715076.jpg',
+    mainImage: heroKostBojongsoang,
     galleryImages: [
-      '/src/assets/images/hero_kost_bojongsoang_1792854715076.jpg',
-      '/src/assets/images/kost_room_modern_1792854715841.jpg',
-      '/src/assets/images/kost_shared_kitchen_1792854716762.jpg',
+      heroKostBojongsoang,
+      kostRoomModern,
+      kostSharedKitchen,
     ],
     whatsappNumber: '6281398765432',
     rules: [
@@ -177,11 +184,11 @@ export const KOST_LISTINGS: KostProperty[] = [
     includedUtilities: ['Wi-Fi Dedicated 200 Mbps', 'Air Bersih & Water Heater', 'Maintenance AC Berkala', 'Cleaning Service Area Bersama'],
     electricityPolicy: 'Listrik token mandiri per kamar',
     features: ['Air Conditioner Daikin 1/2 PK', 'Water Heater Ariston', 'Kamar Mandi Dalam Mewah', 'Kasur Queen Size 160x200', 'Balkon Pribadi', 'Smart TV 32 Inch', 'Parkir Mobil & Motor Luas', 'Smart Door Lock Digital'],
-    mainImage: '/src/assets/images/kost_room_deluxe_1792854716917.jpg',
+    mainImage: kostRoomDeluxe,
     galleryImages: [
-      '/src/assets/images/kost_room_deluxe_1792854716917.jpg',
-      '/src/assets/images/kost_shared_kitchen_1792854716762.jpg',
-      '/src/assets/images/hero_kost_bojongsoang_1792854715076.jpg'
+      kostRoomDeluxe,
+      kostSharedKitchen,
+      heroKostBojongsoang,
     ],
     whatsappNumber: '6281122334455',
     rules: [
@@ -225,11 +232,11 @@ export const KOST_LISTINGS: KostProperty[] = [
     includedUtilities: ['Wi-Fi 100 Mbps', 'Air Minum Galon Gratis', 'Iuran Sampah & Kebersihan Lorong'],
     electricityPolicy: 'Token listrik mandiri per kamar',
     features: ['AC (Pilihan Varian)', 'Kamar Mandi Dalam', 'Kloset Duduk & Jet Shower', 'Dapur Bersama Modern Lengkap', 'Rooftop Jemuran Luas', 'Ruang Tamu & Belajar Bersama', 'Parkir Motor Tertutup', 'Akses Gerbang Kartu'],
-    mainImage: '/src/assets/images/kost_shared_kitchen_1792854716762.jpg',
+    mainImage: kostSharedKitchen,
     galleryImages: [
-      '/src/assets/images/kost_shared_kitchen_1792854716762.jpg',
-      '/src/assets/images/kost_room_modern_1792854715841.jpg',
-      '/src/assets/images/hero_kost_bojongsoang_1792854715076.jpg'
+      kostSharedKitchen,
+      kostRoomModern,
+      heroKostBojongsoang,
     ],
     whatsappNumber: '6285223344556',
     rules: [
@@ -273,10 +280,10 @@ export const KOST_LISTINGS: KostProperty[] = [
     includedUtilities: ['Wi-Fi 75 Mbps', 'Air Bersih Sumur Bor Jernih', 'Sudah Termasuk Listrik Standar'],
     electricityPolicy: 'Sudah termasuk biaya listrik bulanan (bebas biaya tambahan)',
     features: ['Kasur Busa Tebal & Bantal', 'Kamar Mandi Bersama Bersih (1:2)', 'Meja & Lemari Kayu', 'Dapur Bersama Sederhana', 'Parkir Motor Aman di Dalam Pagar', 'Ruang Santai TV'],
-    mainImage: '/src/assets/images/hero_kost_bojongsoang_1792854715076.jpg',
+    mainImage: heroKostBojongsoang,
     galleryImages: [
-      '/src/assets/images/hero_kost_bojongsoang_1792854715076.jpg',
-      '/src/assets/images/kost_room_modern_1792854715841.jpg'
+      heroKostBojongsoang,
+      kostRoomModern,
     ],
     whatsappNumber: '6282112233990',
     rules: [
@@ -320,11 +327,11 @@ export const KOST_LISTINGS: KostProperty[] = [
     includedUtilities: ['Wi-Fi Fiber 150 Mbps Mesh', 'Air Minum Galon', 'Kebersihan Koridor'],
     electricityPolicy: 'Token listrik per kamar',
     features: ['AC Dingin 1 PK', 'Kamar Mandi Dalam & Water Heater', 'Springbed King Size', 'Meja Belajar Kayu Solid', 'Balkon Pribadi Hadap Luar', 'Parkir Motor & Mobil', 'CCTV 16 Titik'],
-    mainImage: '/src/assets/images/kost_room_deluxe_1792854716917.jpg',
+    mainImage: kostRoomDeluxe,
     galleryImages: [
-      '/src/assets/images/kost_room_deluxe_1792854716917.jpg',
-      '/src/assets/images/kost_room_modern_1792854715841.jpg',
-      '/src/assets/images/kost_shared_kitchen_1792854716762.jpg'
+      kostRoomDeluxe,
+      kostRoomModern,
+      kostSharedKitchen,
     ],
     whatsappNumber: '6287711223344',
     rules: [
@@ -351,6 +358,7 @@ export const KOST_LISTINGS: KostProperty[] = [
 ];
 
 export const CAMPUS_POIS: CampusPOI[] = [
+  // Gerbang & Landmark Kampus
   {
     id: 'poi-telkom-rektorat',
     name: 'Gedung Rektorat & Landmark Telkom University',
@@ -359,17 +367,21 @@ export const CAMPUS_POIS: CampusPOI[] = [
     description: 'Pusat administrasi, rektorat, dan taman terbuka Telkom University',
     x: 50,
     y: 50,
-    position: { lat: -6.9731, lng: 107.6303 }
+    position: { lat: -6.9731, lng: 107.6303 },
+    openingHours: '08.00 - 17.00 WIB',
+    priceEstimate: 'Akses Mahasiswa & Civitas'
   },
   {
     id: 'poi-gate-sukabirus',
     name: 'Gerbang 1 Sukabirus (Tel-U)',
     category: 'gate',
     distance: '250m - 400m dari deretan kost',
-    description: 'Akses pejalan kaki & motor terpopuler mahasiswa, ramai kuliner & fotokopi',
+    description: 'Akses pejalan kaki & motor terpopuler mahasiswa, ramai sentra kuliner, fotokopi & laundry',
     x: 40,
     y: 45,
-    position: { lat: -6.9715, lng: 107.6292 }
+    position: { lat: -6.9715, lng: 107.6292 },
+    openingHours: 'Buka 24 Jam (Portal Khusus Mahasiswa)',
+    priceEstimate: 'Akses Bebas Pejalan Kaki & Motor'
   },
   {
     id: 'poi-gate-pga',
@@ -379,67 +391,185 @@ export const CAMPUS_POIS: CampusPOI[] = [
     description: 'Akses langsung menuju Gedung Kuliah Bersama TULT & Fakultas Teknik Elektro',
     x: 56,
     y: 54,
-    position: { lat: -6.9748, lng: 107.6325 }
+    position: { lat: -6.9748, lng: 107.6325 },
+    openingHours: '05.30 - 23.00 WIB',
+    priceEstimate: 'Akses Mobil, Motor & Pejalan Kaki'
   },
   {
     id: 'poi-gate-sukapura',
     name: 'Gerbang 3 Sukapura (Tel-U)',
     category: 'gate',
     distance: '450m dari kost Sukapura',
-    description: 'Akses dekat asrama mahasiswa baru dan fakultas ilmu terapan',
+    description: 'Akses dekat asrama mahasiswa baru, Telkomedika, dan Fakultas Ilmu Terapan (FIT)',
     x: 32,
     y: 38,
-    position: { lat: -6.9698, lng: 107.6335 }
+    position: { lat: -6.9698, lng: 107.6335 },
+    openingHours: '06.00 - 22.00 WIB',
+    priceEstimate: 'Akses Gerbang Utama Timur'
   },
   {
     id: 'poi-tult-building',
     name: 'Gedung Kuliah Bersama (TULT)',
     category: 'academic',
     distance: 'Di dalam kampus',
-    description: 'Gedung perkuliahan tertinggi kampus Tel-U dengan ruang kelas modern',
+    description: 'Gedung perkuliahan tertinggi kampus Tel-U dengan ruang kelas modern dan lab teknologi',
     x: 53,
     y: 47,
-    position: { lat: -6.9740, lng: 107.6315 }
+    position: { lat: -6.9740, lng: 107.6315 },
+    openingHours: '07.00 - 21.00 WIB',
+    priceEstimate: 'Fasilitas Perkuliahan'
   },
   {
     id: 'poi-open-library',
     name: 'Open Library Telkom University',
     category: 'academic',
     distance: 'Di dalam kampus',
-    description: 'Perpustakaan megah ramah mahasiswa dengan spot belajar santai',
+    description: 'Perpustakaan megah ramah mahasiswa dengan spot belajar santai, pod private & Wi-Fi gigabit',
     x: 47,
     y: 52,
-    position: { lat: -6.9725, lng: 107.6318 }
+    position: { lat: -6.9725, lng: 107.6318 },
+    openingHours: '08.00 - 19.30 WIB',
+    priceEstimate: 'Gratis Civitas Tel-U'
   },
+
+  // Minimarket & Supermarket
   {
     id: 'poi-indomaret-sukabirus',
     name: 'Indomaret & ATM Center Sukabirus',
     category: 'market',
-    distance: '150m di jalan utama',
-    description: 'Buka 24 jam, tarik tunai BCA/Mandiri/BRI dan belanja kebutuhan harian',
+    distance: '150m di jalan utama Sukabirus',
+    description: 'Minimarket 24 jam dengan ATM Center (BCA, Mandiri, BRI), galon air mineral, gas, dan e-money top-up',
     x: 36,
     y: 42,
-    position: { lat: -6.9710, lng: 107.6288 }
+    position: { lat: -6.9710, lng: 107.6288 },
+    openingHours: 'Buka 24 Jam',
+    priceEstimate: 'Tersedia ATM BCA, Mandiri, BRI & Sayur Buah Fresh'
   },
   {
-    id: 'poi-telkomedika',
-    name: 'Klinik Utama TelkoMedika',
-    category: 'facility',
-    distance: '400m dari kampus',
-    description: 'Fasilitas kesehatan resmi mahasiswa & umum di Jalan Radio PGA',
-    x: 60,
-    y: 58,
-    position: { lat: -6.9760, lng: 107.6338 }
+    id: 'poi-alfamart-pga',
+    name: 'Alfamart 24 Jam & ATM Radio PGA',
+    category: 'market',
+    distance: '200m dari Gerbang 2 PGA',
+    description: 'Minimarket strategis kawasan PGA dengan Beans Spot Coffee, aneka roti fresh, dan mesin ATM BCA/Mandiri',
+    x: 58,
+    y: 56,
+    position: { lat: -6.9752, lng: 107.6331 },
+    openingHours: 'Buka 24 Jam',
+    priceEstimate: 'ATM BCA & Mandiri, Kopi Beans Spot'
+  },
+  {
+    id: 'poi-indomaret-sukapura',
+    name: 'Indomaret Point Sukapura',
+    category: 'market',
+    distance: '350m dari Gerbang Sukapura',
+    description: 'Minimarket konsep Point dengan area duduk semi-outdoor, Point Coffee, dan perlengkapan mandi/kost',
+    x: 30,
+    y: 35,
+    position: { lat: -6.9692, lng: 107.6342 },
+    openingHours: 'Buka 24 Jam',
+    priceEstimate: 'Point Coffee, ATM, Snack & Kuliner Siap Saji'
   },
   {
     id: 'poi-borma-bojongsoang',
     name: 'Borma Toserba Bojongsoang',
     category: 'market',
     distance: '1.2 km di Jl. Raya Bojongsoang',
-    description: 'Pusat belanja supermarket lengkap, perlengkapan kamar kost, dan kuliner',
+    description: 'Pusat supermarket serba ada: perlengkapan kamar kost (ember, sprei, hanger), bahan makanan segar, dan food court',
     x: 78,
     y: 30,
-    position: { lat: -6.9805, lng: 107.6382 }
+    position: { lat: -6.9805, lng: 107.6382 },
+    openingHours: '08.00 - 21.30 WIB',
+    priceEstimate: 'Supermarket Lengkap & Grosir Murah'
+  },
+
+  // Warung Makan & Kuliner
+  {
+    id: 'poi-warteg-bahari-sukabirus',
+    name: 'Warteg Bahari Jaya Sukabirus',
+    category: 'food',
+    distance: '100m dari Gerbang 1 Sukabirus',
+    description: 'Warung makan prasmanan 24 jam dengan 30+ pilihan lauk higienis, sayur tumis segar, dan harga ramah kantong mahasiswa.',
+    x: 38,
+    y: 44,
+    position: { lat: -6.9718, lng: 107.6285 },
+    openingHours: 'Buka 24 Jam',
+    priceEstimate: 'Rp 12.000 - Rp 25.000 / porsi lengkap'
+  },
+  {
+    id: 'poi-ayam-geprek-bebas',
+    name: 'Ayam Geprek Bebas Sukabirus',
+    category: 'food',
+    distance: '150m dari deretan kost Sukabirus',
+    description: 'Kuliner ayam krispi pedas legendaris mahasiswa Tel-U dengan level cabai sesuai selera, nasi dan es teh ambil sepuasnya.',
+    x: 41,
+    y: 41,
+    position: { lat: -6.9708, lng: 107.6295 },
+    openingHours: '10.00 - 22.00 WIB',
+    priceEstimate: 'Rp 15.000 - Rp 22.000 / paket nasi + minum'
+  },
+  {
+    id: 'poi-kantin-pga',
+    name: 'Food Court & Pujasera Terusan PGA',
+    category: 'food',
+    distance: '200m dari Gerbang 2 PGA',
+    description: 'Sentra kuliner mahasiswa dengan aneka menu: Mie Aceh, Nasi Padang, Soto Lamongan, Ayam Bakar Madu, dan aneka jus buah segar.',
+    x: 57,
+    y: 53,
+    position: { lat: -6.9745, lng: 107.6332 },
+    openingHours: '09.00 - 23.00 WIB',
+    priceEstimate: 'Rp 15.000 - Rp 30.000 / menu'
+  },
+
+  // Laundry Kiloan
+  {
+    id: 'poi-laundry-express-sukabirus',
+    name: 'Koin Kiloan Laundry Express Sukabirus',
+    category: 'laundry',
+    distance: '50m di simpang jalan Sukabirus',
+    description: 'Jasa cuci kering kilat (express 4 jam selesai), setrika uap rapi, dan layanan jemput-antar langsung ke kamar kost.',
+    x: 35,
+    y: 46,
+    position: { lat: -6.9722, lng: 107.6280 },
+    openingHours: '07.00 - 21.00 WIB',
+    priceEstimate: 'Mulai Rp 7.000 / kg (Cuci + Kering + Setrika)'
+  },
+  {
+    id: 'poi-laundry-clean-pga',
+    name: 'Daily Wash & Laundry Kiloan PGA',
+    category: 'laundry',
+    distance: '120m dari Gerbang 2 PGA',
+    description: 'Laundry koin modern dan kiloan higienis dengan deterjen & pelembut premium anti-bakteri, aman untuk pakaian bahan sensitif.',
+    x: 59,
+    y: 57,
+    position: { lat: -6.9755, lng: 107.6328 },
+    openingHours: '06.30 - 22.00 WIB',
+    priceEstimate: 'Mulai Rp 8.000 / kg'
+  },
+
+  // Fasilitas Kesehatan & Percetakan
+  {
+    id: 'poi-telkomedika',
+    name: 'Klinik Utama TelkoMedika',
+    category: 'facility',
+    distance: '400m dari kampus di Jl. Radio PGA',
+    description: 'Fasilitas kesehatan resmi mahasiswa Telkom University & umum: dokter umum 24 jam, dokter gigi, laboratorium, dan apotek lengkap.',
+    x: 60,
+    y: 58,
+    position: { lat: -6.9760, lng: 107.6338 },
+    openingHours: 'UGD 24 Jam / Poli 08.00 - 20.00 WIB',
+    priceEstimate: 'BPJS Kesehatan & Asuransi Mahasiswa Tel-U'
+  },
+  {
+    id: 'poi-fotokopi-sukabirus',
+    name: 'Sentra Percetakan & Fotokopi Digital 24 Jam',
+    category: 'facility',
+    distance: '100m dari Gerbang 1 Sukabirus',
+    description: 'Pusat print tugas warna/BW cepat, jilid skripsi soft/hardcover kilat, fotokopi murah, dan perlengkapan alat tulis kuliah.',
+    x: 39,
+    y: 43,
+    position: { lat: -6.9712, lng: 107.6290 },
+    openingHours: 'Buka 24 Jam',
+    priceEstimate: 'Print mulai Rp 500 / lembar, Jilid Rp 5.000'
   }
 ];
 

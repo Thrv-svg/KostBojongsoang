@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
-import { Home, Compass, HelpCircle, MessageSquare, Calendar, Menu, X, PhoneCall } from 'lucide-react';
+import { Home, Compass, HelpCircle, MessageSquare, Calendar, Menu, X, Heart } from 'lucide-react';
 
 interface NavbarProps {
   onOpenBooking: () => void;
+  onOpenWishlist: () => void;
+  favoritesCount: number;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  onOpenBooking,
+  onOpenWishlist,
+  favoritesCount = 0,
+}) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
     { label: 'Katalog Kost', href: '#katalog-kost', icon: Home },
+    { label: 'Kamar Favorit', href: '#kamar-favorit', icon: Heart },
     { label: 'Peta Lokasi & Kampus', href: '#peta-lokasi', icon: Compass },
     { label: 'FAQ', href: '#faq', icon: HelpCircle },
     { label: 'Testimoni', href: '#testimoni', icon: MessageSquare },
@@ -37,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
         </a>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-5 lg:gap-6">
           {navLinks.map((link) => (
             <a
               key={link.label}
@@ -45,19 +52,46 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
               className="text-xs font-semibold text-slate-600 hover:text-[#0EA5E9] transition-colors flex items-center gap-1.5"
             >
               <span>{link.label}</span>
+              {link.label === 'Kamar Favorit' && favoritesCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white">
+                  {favoritesCount}
+                </span>
+              )}
             </a>
           ))}
         </nav>
 
         {/* Right CTA */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Wishlist Header Button with live badge */}
+          <button
+            type="button"
+            onClick={onOpenWishlist}
+            className={`relative flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl border transition-all cursor-pointer active:scale-95 ${
+              favoritesCount > 0
+                ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200 shadow-2xs'
+                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+            }`}
+            title={`Lihat Daftar Kamar Favorit (${favoritesCount} tersimpan)`}
+            aria-label="Buka Kamar Favorit"
+          >
+            <Heart className={`w-3.5 h-3.5 ${favoritesCount > 0 ? 'fill-rose-500 text-rose-500' : 'text-slate-400'}`} />
+            <span className="hidden sm:inline">Favorit</span>
+            {favoritesCount > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white leading-none">
+                {favoritesCount}
+              </span>
+            )}
+          </button>
+
           <button
             type="button"
             onClick={onOpenBooking}
             className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#0C4A6E] bg-[#F97316] hover:bg-[#ea580c] hover:text-white rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap active:translate-y-0.5"
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>Formulir Rencana Masuk</span>
+            <span className="hidden xs:inline">Formulir Rencana Masuk</span>
+            <span className="xs:hidden">Rencana Masuk</span>
           </button>
 
           {/* Mobile menu toggle */}
@@ -82,10 +116,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 hover:text-[#0EA5E9] hover:bg-slate-50 rounded-lg transition-colors"
+                className="flex items-center justify-between px-3 py-2 text-xs font-medium text-slate-700 hover:text-[#0EA5E9] hover:bg-slate-50 rounded-lg transition-colors"
               >
-                <Icon className="w-4 h-4 text-slate-400" />
-                <span>{link.label}</span>
+                <div className="flex items-center gap-2.5">
+                  <Icon className={`w-4 h-4 ${link.label === 'Kamar Favorit' && favoritesCount > 0 ? 'text-rose-500' : 'text-slate-400'}`} />
+                  <span>{link.label}</span>
+                </div>
+                {link.label === 'Kamar Favorit' && favoritesCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">
+                    {favoritesCount} tersimpan
+                  </span>
+                )}
               </a>
             );
           })}

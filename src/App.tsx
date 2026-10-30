@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { KOST_LISTINGS, KostProperty } from './data/kostData';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { KostCard } from './components/KostCard';
+import { KostCardSkeleton } from './components/KostCardSkeleton';
 import { CampusMap } from './components/CampusMap';
 import { FaqSection } from './components/FaqSection';
 import { Testimonials } from './components/Testimonials';
@@ -12,7 +13,12 @@ import { StickyMobileCTA } from './components/StickyMobileCTA';
 import { Footer } from './components/Footer';
 import { CompareFloatingBar } from './components/CompareFloatingBar';
 import { CompareModal } from './components/CompareModal';
-import { Sparkles, RefreshCw, Filter, CheckCircle2, ArrowRightLeft, AlertCircle } from 'lucide-react';
+import { WishlistDrawer } from './components/WishlistDrawer';
+import { FavoritesSection } from './components/FavoritesSection';
+import { useFavorites } from './hooks/useFavorites';
+import { Sparkles, RefreshCw, Filter, CheckCircle2, ArrowRightLeft, AlertCircle, ArrowUpDown, ChevronDown, Heart, Loader2 } from 'lucide-react';
+
+export type SortOption = 'recommended' | 'price-asc' | 'price-desc' | 'rating-desc' | 'distance-asc';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -25,6 +31,19 @@ export default function App() {
     waterHeater: false,
   });
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [sortBy, setSortBy] = useState<SortOption>('recommended');
+
+  // Favorites / Wishlist state (persisted via localStorage)
+  const {
+    favoriteIds,
+    isFavorite,
+    toggleFavorite,
+    removeFavorite,
+    clearFavorites,
+    favoritesCount,
+  } = useFavorites();
+  const [isWishlistDrawerOpen, setIsWishlistDrawerOpen] = useState<boolean>(false);
+  const [wishlistToast, setWishlistToast] = useState<string | null>(null);
 
   // Modals & Compare state
   const [selectedKostForDetail, setSelectedKostForDetail] = useState<KostProperty | null>(null);
@@ -34,6 +53,31 @@ export default function App() {
   const [isCompareModalOpen, setIsCompareModalOpen] = useState<boolean>(false);
   const [compareToast, setCompareToast] = useState<string | null>(null);
   const [quotaExceeded, setQuotaExceeded] = useState<boolean>(false);
+
+  // Loading state for initial load & dynamic filter updates (Skeleton feedback)
+  const [isLoadingListings, setIsLoadingListings] = useState<boolean>(true);
+  const isFirstRender = useRef(true);
+
+  // Initial load simulation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoadingListings(false);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Trigger skeleton loading whenever filters or sorting change
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setIsLoadingListings(true);
+    const timer = setTimeout(() => {
+      setIsLoadingListings(false);
+    }, 280);
+    return () => clearTimeout(timer);
+  }, [selectedCategory, maxPrice, facilityFilters, searchQuery, sortBy]);
 
   useEffect(() => {
     const handleQuota = () => setQuotaExceeded(true);
@@ -49,8 +93,9 @@ export default function App() {
     }));
   };
 
-  // Reset all filters
+  // Reset all filters and sort
   const handleResetFilters = () => {
+    setIsLoadingListings(true);
     setSelectedCategory('all');
     setMaxPrice(3000000);
     setFacilityFilters({
@@ -61,12 +106,33 @@ export default function App() {
       waterHeater: false,
     });
     setSearchQuery('');
+    setSortBy('recommended');
+    setTimeout(() => {
+      setIsLoadingListings(false);
+    }, 250);
   };
 
   // Open booking modal for a specific kost or general
   const handleOpenBooking = (kost?: KostProperty) => {
     setKostForBooking(kost || null);
     setIsBookingModalOpen(true);
+  };
+
+  // Favorite state helpers
+  const favoriteKosts = useMemo(() => {
+    return KOST_LISTINGS.filter((k) => favoriteIds.includes(k.id));
+  }, [favoriteIds]);
+
+  const handleToggleFavoriteWithToast = (id: string) => {
+    const isNowFav = toggleFavorite(id);
+    const kost = KOST_LISTINGS.find((k) => k.id === id);
+    const name = kost ? kost.name : 'Kamar';
+    setWishlistToast(
+      isNowFav
+        ? `❤️ ${name} disimpan ke Favorit!`
+        : `${name} dihapus dari Favorit.`
+    );
+    setTimeout(() => setWishlistToast(null), 3000);
   };
 
   // Compare state helpers
@@ -96,11 +162,13 @@ export default function App() {
     setCompareList([]);
   };
 
-  // Filter listings
+  // Filter & sort listings
   const filteredKosts = useMemo(() => {
-    return KOST_LISTINGS.filter((kost) => {
-      // Category filter
-      if (selectedCategory !== 'all' && kost.category !== selectedCategory) {
+    const list = KOST_LISTINGS.filter((kost) => {
+      // Category filter (support 'favorit' filter)
+      if (selectedCategory === 'favorit') {
+        if (!favoriteIds.includes(kost.id)) return false;
+      } else if (selectedCategory !== 'all' && kost.category !== selectedCategory) {
         return false;
       }
 
@@ -133,10 +201,37 @@ export default function App() {
 
       return true;
     });
-  }, [selectedCategory, maxPrice, facilityFilters, searchQuery]);
+
+    // Apply sorting
+    return [...list].sort((a, b) => {
+      if (sortBy === 'price-asc') {
+        return a.monthlyPrice - b.monthlyPrice;
+      }
+      if (sortBy === 'price-desc') {
+        return b.monthlyPrice - a.monthlyPrice;
+      }
+      if (sortBy === 'rating-desc') {
+        if (b.rating !== a.rating) {
+          return b.rating - a.rating;
+        }
+        return b.reviewCount - a.reviewCount;
+      }
+      if (sortBy === 'distance-asc') {
+        return a.distanceMeters - b.distanceMeters;
+      }
+      return 0; // 'recommended' preserves curated list order
+    });
+  }, [selectedCategory, maxPrice, facilityFilters, searchQuery, sortBy, favoriteIds]);
 
   const scrollToCatalog = () => {
     const el = document.getElementById('katalog-kost');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToFavorites = () => {
+    const el = document.getElementById('kamar-favorit');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
@@ -162,16 +257,24 @@ export default function App() {
         </div>
       )}
 
-      {/* Toast Notification Banner (e.g. Max compare limit) */}
-      {compareToast && (
+      {/* Toast Notification Banner (e.g. Max compare limit or Wishlist action) */}
+      {(compareToast || wishlistToast) && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[130] bg-[#0C4A6E] text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold shadow-xl flex items-center gap-2 border border-sky-400/50 animate-in fade-in slide-in-from-top-2">
-          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>{compareToast}</span>
+          {wishlistToast ? (
+            <Heart className="w-4 h-4 text-rose-400 fill-rose-400 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+          )}
+          <span>{wishlistToast || compareToast}</span>
         </div>
       )}
 
       {/* Top Bar Contract Navigation */}
-      <Navbar onOpenBooking={() => handleOpenBooking()} />
+      <Navbar
+        onOpenBooking={() => handleOpenBooking()}
+        onOpenWishlist={() => setIsWishlistDrawerOpen(true)}
+        favoritesCount={favoritesCount}
+      />
 
       {/* Main Content */}
       <main className="flex-1">
@@ -191,60 +294,171 @@ export default function App() {
         {/* Boarding House Listings Grid */}
         <section id="katalog-kost" className="py-16 bg-[#F8FAFC]">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
-            {/* Catalog Header with Category Switcher */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-              <div>
-                <div className="flex items-center gap-2 text-xs font-semibold text-[#0EA5E9] uppercase tracking-wider mb-1">
-                  <Sparkles className="w-4 h-4" />
-                  <span>Katalog Terverifikasi</span>
+            {/* Catalog Header with Category Switcher and Sorting Dropdown */}
+            <div className="mb-8">
+              <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#0EA5E9] uppercase tracking-wider mb-1">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Katalog Terverifikasi</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-[#0C4A6E] tracking-tight">
+                    Pilihan Kamar Kost di Bojongsoang
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-sm text-slate-600">
+                    <p>
+                      Menampilkan <span className="font-semibold text-[#0C4A6E]">{filteredKosts.length}</span> dari {KOST_LISTINGS.length} kost terdaftar dekat Telkom University
+                    </p>
+                    {isLoadingListings && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 text-[#0EA5E9] text-xs font-semibold border border-sky-200 animate-pulse">
+                        <Loader2 className="w-3 h-3 animate-spin text-[#0EA5E9]" />
+                        <span>Memuat hasil...</span>
+                      </span>
+                    )}
+                    {compareList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsCompareModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-100 hover:bg-sky-200 text-[#0C4A6E] text-xs font-bold transition-colors cursor-pointer border border-sky-300"
+                      >
+                        <ArrowRightLeft className="w-3 h-3 text-[#0EA5E9]" />
+                        <span>Bandingkan ({compareList.length}/3)</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-[#0C4A6E] tracking-tight">
-                  Pilihan Kamar Kost di Bojongsoang
-                </h2>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1 text-sm text-slate-600">
-                  <p>
-                    Menampilkan <span className="font-semibold text-[#0C4A6E]">{filteredKosts.length}</span> dari {KOST_LISTINGS.length} kost terdaftar dekat Telkom University
-                  </p>
-                  {compareList.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setIsCompareModalOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-100 hover:bg-sky-200 text-[#0C4A6E] text-xs font-bold transition-colors cursor-pointer border border-sky-300"
-                    >
-                      <ArrowRightLeft className="w-3 h-3 text-[#0EA5E9]" />
-                      <span>Bandingkan ({compareList.length}/3)</span>
-                    </button>
-                  )}
+
+                {/* Controls: Segmented Category Switcher & Sorting Dropdown */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  {/* Category Filter Pills */}
+                  <div className="flex items-center gap-1 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs overflow-x-auto shrink-0">
+                    {[
+                      { id: 'all', label: 'Semua' },
+                      { id: 'putra', label: 'Kost Putra' },
+                      { id: 'putri', label: 'Kost Putri' },
+                      { id: 'campur', label: 'Kost Campur' },
+                      ...(favoritesCount > 0
+                        ? [{ id: 'favorit', label: `❤️ Favorit (${favoritesCount})` }]
+                        : []),
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setSelectedCategory(tab.id)}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                          selectedCategory === tab.id
+                            ? 'bg-[#0C4A6E] text-white shadow-xs font-semibold'
+                            : 'text-slate-600 hover:text-[#0C4A6E]'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Dropdown Sorting */}
+                  <div className="relative flex items-center shrink-0">
+                    <label htmlFor="catalog-sort" className="sr-only">Urutkan Kost</label>
+                    <div className="relative w-full sm:w-auto">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#0EA5E9]">
+                        <ArrowUpDown className="w-3.5 h-3.5" />
+                      </div>
+                      <select
+                        id="catalog-sort"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as SortOption)}
+                        className="w-full sm:w-auto pl-8 pr-9 py-2 text-xs font-semibold text-[#0C4A6E] bg-white border border-slate-200 rounded-xl shadow-2xs hover:border-[#0EA5E9] focus:outline-none focus:ring-2 focus:ring-[#0EA5E9]/20 focus:border-[#0EA5E9] appearance-none cursor-pointer transition-colors"
+                        aria-label="Urutkan pilihan kost"
+                      >
+                        <option value="recommended">🌟 Rekomendasi</option>
+                        <option value="price-asc">📉 Harga: Termurah ke Termahal</option>
+                        <option value="price-desc">📈 Harga: Termahal ke Termurah</option>
+                        <option value="rating-desc">⭐ Rating Tertinggi</option>
+                        <option value="distance-asc">📍 Jarak Terdekat ke Kampus</option>
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400">
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Quick Tab Segmented Control */}
-              <div className="flex items-center gap-1.5 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs overflow-x-auto shrink-0">
-                {[
-                  { id: 'all', label: 'Semua' },
-                  { id: 'putra', label: 'Kost Putra' },
-                  { id: 'putri', label: 'Kost Putri' },
-                  { id: 'campur', label: 'Kost Campur' },
-                ].map((tab) => (
+              {/* Active Filter & Sort Chips summary */}
+              {(sortBy !== 'recommended' || selectedCategory !== 'all' || maxPrice < 3000000 || Object.values(facilityFilters).some(Boolean) || searchQuery) && (
+                <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-slate-200/60 text-xs">
+                  <span className="text-slate-500 font-medium">Filter Aktif:</span>
+                  {sortBy !== 'recommended' && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 text-[#0C4A6E] font-medium border border-sky-200">
+                      <span>
+                        Urut:{' '}
+                        {sortBy === 'price-asc'
+                          ? 'Harga Termurah'
+                          : sortBy === 'price-desc'
+                          ? 'Harga Termahal'
+                          : sortBy === 'rating-desc'
+                          ? 'Rating Tertinggi'
+                          : 'Jarak Terdekat'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSortBy('recommended')}
+                        className="text-slate-400 hover:text-slate-700 font-bold ml-0.5 cursor-pointer"
+                        title="Kembalikan ke rekomendasi"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {selectedCategory !== 'all' && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium border border-slate-200">
+                      <span>
+                        Kategori:{' '}
+                        {selectedCategory === 'putra'
+                          ? 'Kost Putra'
+                          : selectedCategory === 'putri'
+                          ? 'Kost Putri'
+                          : selectedCategory === 'campur'
+                          ? 'Kost Campur'
+                          : 'Kamar Favorit'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategory('all')}
+                        className="text-slate-400 hover:text-slate-700 font-bold ml-0.5 cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {maxPrice < 3000000 && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium border border-slate-200">
+                      <span>Maks: Rp {(maxPrice / 1000000).toFixed(1)} jt</span>
+                      <button
+                        type="button"
+                        onClick={() => setMaxPrice(3000000)}
+                        className="text-slate-400 hover:text-slate-700 font-bold ml-0.5 cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
                   <button
-                    key={tab.id}
                     type="button"
-                    onClick={() => setSelectedCategory(tab.id)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap cursor-pointer ${
-                      selectedCategory === tab.id
-                        ? 'bg-[#0C4A6E] text-white shadow-xs font-semibold'
-                        : 'text-slate-600 hover:text-[#0C4A6E]'
-                    }`}
+                    onClick={handleResetFilters}
+                    className="text-[#0EA5E9] hover:underline font-semibold ml-auto cursor-pointer"
                   >
-                    {tab.label}
+                    Reset Semua
                   </button>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* Listings Grid or Empty State */}
-            {filteredKosts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Listings Grid with Skeleton Loading or Empty State */}
+            {isLoadingListings ? (
+              <KostCardSkeleton count={6} />
+            ) : filteredKosts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-300">
                 {filteredKosts.map((kost) => (
                   <KostCard
                     key={kost.id}
@@ -253,6 +467,8 @@ export default function App() {
                     onOpenBooking={(k) => handleOpenBooking(k)}
                     isCompared={compareList.includes(kost.id)}
                     onToggleCompare={handleToggleCompare}
+                    isFavorite={isFavorite(kost.id)}
+                    onToggleFavorite={handleToggleFavoriteWithToast}
                   />
                 ))}
               </div>
@@ -282,6 +498,20 @@ export default function App() {
           </div>
         </section>
 
+        {/* Dedicated Kamar Favorit Section (Wishlist) */}
+        <FavoritesSection
+          favoriteKosts={favoriteKosts}
+          isFavorite={isFavorite}
+          onToggleFavorite={handleToggleFavoriteWithToast}
+          onClearAllFavorites={clearFavorites}
+          onSelectDetail={(k) => setSelectedKostForDetail(k)}
+          onOpenBooking={(k) => handleOpenBooking(k)}
+          compareList={compareList}
+          onToggleCompare={handleToggleCompare}
+          onOpenCompare={() => setIsCompareModalOpen(true)}
+          onExploreCatalog={scrollToCatalog}
+        />
+
         {/* Interactive Campus Map & Neighborhood Radius */}
         <CampusMap onSelectKost={(kost) => setSelectedKostForDetail(kost)} />
 
@@ -310,6 +540,21 @@ export default function App() {
         onRemoveKost={handleRemoveCompare}
         onClearAll={handleClearCompare}
         onOpenCompare={() => setIsCompareModalOpen(true)}
+        onSelectDetail={(k) => setSelectedKostForDetail(k)}
+      />
+
+      {/* Wishlist Slide-over Drawer */}
+      <WishlistDrawer
+        isOpen={isWishlistDrawerOpen}
+        onClose={() => setIsWishlistDrawerOpen(false)}
+        favoriteKosts={favoriteKosts}
+        onRemoveFavorite={removeFavorite}
+        onClearAll={clearFavorites}
+        onSelectDetail={(k) => setSelectedKostForDetail(k)}
+        onOpenBooking={(k) => handleOpenBooking(k)}
+        onToggleCompare={handleToggleCompare}
+        compareList={compareList}
+        onScrollToFavoritesSection={scrollToFavorites}
       />
 
       {/* Modals */}
@@ -317,6 +562,8 @@ export default function App() {
         kost={selectedKostForDetail}
         onClose={() => setSelectedKostForDetail(null)}
         onProceedBooking={(k) => handleOpenBooking(k)}
+        isFavorite={selectedKostForDetail ? isFavorite(selectedKostForDetail.id) : false}
+        onToggleFavorite={handleToggleFavoriteWithToast}
       />
 
       <BookingModal

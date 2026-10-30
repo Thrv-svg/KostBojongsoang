@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, MapPin, ShieldCheck, Check, Sparkles, Flame, Utensils } from 'lucide-react';
+import heroKostBojongsoang from '../assets/images/hero_kost_bojongsoang_1792854715076.jpg';
 
 interface HeroProps {
   selectedCategory: string;
@@ -48,7 +49,7 @@ export const Hero: React.FC<HeroProps> = ({
 
             {/* Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#0C4A6E] leading-[1.15]" style={{ textWrap: 'balance' }}>
-              Kost Nyaman & Transparan Dekat Kampus Telkom University
+              Informasi Kost Transparan Sekitar Kampus Telkom University
             </h1>
 
             {/* Description */}
@@ -74,7 +75,7 @@ export const Hero: React.FC<HeroProps> = ({
                 <div className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
                   <Check className="w-3 h-3 stroke-[2.5]" />
                 </div>
-                <span>3–6 Menit Jalan Kaki ke Kelas</span>
+                <span>Pilih Kost Sesuai Kebutuhan</span>
               </div>
             </div>
           </div>
@@ -83,7 +84,7 @@ export const Hero: React.FC<HeroProps> = ({
           <div className="lg:col-span-5 relative">
             <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 shadow-md bg-white">
               <img
-                src="/src/assets/images/hero_kost_bojongsoang_1792854715076.jpg"
+                src={heroKostBojongsoang}
                 alt="Gedung Kost Bojongsoang Dekat Kampus Telkom University"
                 className="w-full h-[320px] sm:h-[380px] lg:h-[420px] object-cover hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"
